@@ -244,55 +244,62 @@
             max-width: 800px;
             margin: 2rem auto;
         }        
-        .pdf-header {
-            text-align: center;
-            border-bottom: 3px solid var(--primary);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
+        /* DXF Preview */
+        #dxfPreview {
+            display: none;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 2rem auto;
         }
         
-        .pdf-logo {
-            width: 80px;
-            height: 80px;
-            background: var(--primary);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
+        .preview-tab {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.8rem;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
         
-        .pdf-title {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .pdf-subtitle {
-            color: #6b7280;
-            font-size: 0.95rem;
-        }
-        
-        .pdf-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-        }
-        .pdf-table th, .pdf-table td {
-            padding: 0.8rem;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .pdf-table th {
-            background: #f3f4f6;
+        .tab-btn {
+            padding: 0.7rem 1.5rem;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: 600;
-            color: var(--primary);
+            transition: all 0.3s;
         }
         
-        /* Loading */        .loading {
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .preview-content {
+            display: none;
+        }
+        
+        .preview-content.active {
+            display: block;
+        }
+        
+        .dxf-svg-container {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .dxf-svg {            width: 100%;
+            height: 300px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        /* Loading */
+        .loading {
             display: none;
             text-align: center;
             padding: 2rem;
@@ -334,14 +341,14 @@
         
         /* Footer */
         footer {
-            text-align: center;
-            padding: 2rem;
+            text-align: center;            padding: 2rem;
             color: rgba(255,255,255,0.9);
             font-size: 0.9rem;
         }
         footer a { color: white; text-decoration: none; font-weight: 600; }
     </style>
-</head><body>
+</head>
+<body>
     <div class="container">
         <!-- Header -->
         <header>
@@ -383,14 +390,14 @@
                         <option value="6D16">6D16</option>
                         <option value="4D19">4D19</option>
                         <option value="6D19">6D19</option>
-                        <option value="8D16">8D16</option>
-                    </select>
+                        <option value="8D16">8D16</option>                    </select>
                 </div>
                 <div class="form-group">
                     <label for="stirrup">Sengkang</label>
                     <select id="stirrup">
                         <option value="Ø8@150">Ø8 @150 mm</option>
-                        <option value="Ø8@200">Ø8 @200 mm</option>                        <option value="Ø10@150">Ø10 @150 mm</option>
+                        <option value="Ø8@200">Ø8 @200 mm</option>
+                        <option value="Ø10@150">Ø10 @150 mm</option>
                         <option value="Ø10@200">Ø10 @200 mm</option>
                     </select>
                 </div>
@@ -432,14 +439,14 @@
                     <span class="result-value" id="dimensi">300 × 500 mm</span>
                 </div>
                 <div class="result-item">
-                    <span class="result-label">Luas Penampang Beton</span>
-                    <span class="result-value" id="ac">150,000 mm²</span>
+                    <span class="result-label">Luas Penampang Beton</span>                    <span class="result-value" id="ac">150,000 mm²</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">Luas Tulangan Utama</span>
                     <span class="result-value" id="as">804 mm²</span>
                 </div>
-                <div class="result-item">                    <span class="result-label">Rasio Tulangan (ρ)</span>
+                <div class="result-item">
+                    <span class="result-label">Rasio Tulangan (ρ)</span>
                     <span class="result-value" id="rho">0.54%</span>
                 </div>
                 <div class="result-item">
@@ -481,14 +488,37 @@
             <div class="btn-group">
                 <button class="btn btn-success" onclick="generatePDF()">
                     <i class="fas fa-file-pdf"></i> Export PDF Laporan
-                </button>
-                <button class="btn btn-outline" onclick="exportDXF()">
+                </button>                <button class="btn btn-outline" onclick="exportDXF()">
                     <i class="fas fa-file-export"></i> Export DXF (AutoCAD)
                 </button>
             </div>
+
+            <!-- DXF Preview Tab -->
+            <div style="margin-top: 2rem;">
+                <div class="preview-tab">
+                    <button class="tab-btn active" onclick="showTab('dxf-svg')">Pratinjau DXF</button>
+                    <button class="tab-btn" onclick="showTab('dxf-code')">Kode DXF</button>
+                </div>
+
+                <div id="dxf-svg" class="preview-content active">
+                    <div class="dxf-svg-container">
+                        <h4 style="color:var(--primary); margin-bottom:1rem;">Pratinjau DXF di Browser</h4>
+                        <svg class="dxf-svg" id="dxfSvg" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Placeholder -->
+                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af">Klik "Export DXF" dulu untuk pratinjau</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div id="dxf-code" class="preview-content">
+                    <h4 style="color:var(--primary); margin-bottom:1rem;">Kode DXF</h4>
+                    <textarea id="dxfCode" style="width:100%; height:200px; padding:1rem; border:1px solid #e5e7eb; border-radius:6px; font-family:monospace; font-size:0.8rem;" readonly placeholder="Klik Export DXF untuk melihat kode..."></textarea>
+                </div>
+            </div>
         </div>
 
-        <!-- Info -->        <div class="card">
+        <!-- Info -->
+        <div class="card">
             <h2 class="card-title"><i class="fas fa-info-circle"></i> Panduan Singkat</h2>
             <ul style="padding-left:1.5rem;color:#4b5563;line-height:1.8;">
                 <li><strong>SNI 2847:2019:</strong> Rasio tulangan maks 4% untuk kolom tekan murni</li>
@@ -507,8 +537,7 @@
             <p class="pdf-subtitle">Prodak Digital Mouza Engineer | Sesuai SNI 2847:2019</p>
             <span class="pdf-badge">Standar Indonesia</span>
         </div>
-        
-        <div class="pdf-section">
+                <div class="pdf-section">
             <h3 class="pdf-section-title">📋 Data Kolom</h3>
             <table class="pdf-table">
                 <tr><th>Parameter</th><th>Nilai</th></tr>
@@ -537,7 +566,8 @@
                 <svg width="350" height="200" xmlns="http://www.w3.org/2000/svg">
                     <rect x="100" y="60" width="150" height="80" fill="none" stroke="#1e3a8a" stroke-width="2"/>
                     <circle cx="130" cy="90" r="5" fill="#25d366"/>
-                    <circle cx="220" cy="90" r="5" fill="#25d366"/>                    <circle cx="130" cy="110" r="5" fill="#25d366"/>
+                    <circle cx="220" cy="90" r="5" fill="#25d366"/>
+                    <circle cx="130" cy="110" r="5" fill="#25d366"/>
                     <circle cx="220" cy="110" r="5" fill="#25d366"/>
                     <rect x="100" y="60" width="150" height="80" fill="none" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,2"/>
                     <text x="100" y="50" font-size="10" fill="#1e3a8a">b=300</text>
@@ -556,8 +586,7 @@
         </div>
     </div>
 
-    <!-- Loading -->
-    <div class="loading" id="loading">
+    <!-- Loading -->    <div class="loading" id="loading">
         <div class="spinner"></div>
         <p>Sedang menghitung & generating...</p>
     </div>
@@ -586,7 +615,8 @@
             const h = parseFloat(document.getElementById('h').value);
             const height = parseFloat(document.getElementById('height').value);
             const floors = parseInt(document.getElementById('floors').value);
-            const mainRebar = document.getElementById('mainRebar').value;            const stirrup = document.getElementById('stirrup').value;
+            const mainRebar = document.getElementById('mainRebar').value;
+            const stirrup = document.getElementById('stirrup').value;
             const concrete = document.getElementById('concrete').value;
             const steel = document.getElementById('steel').value;
 
@@ -605,8 +635,7 @@
             let status = "Aman ✅";
             let statusColor = "var(--accent)";
             if (rho > 4.0) {
-                status = "Perlu Evaluasi ⚠️";
-                statusColor = "#f59e0b";
+                status = "Perlu Evaluasi ⚠️";                statusColor = "#f59e0b";
             }
 
             // Update results
@@ -635,7 +664,8 @@
             if (group) svg.removeChild(group);
 
             // Draw new
-            const rect = document.createElementNS(svgNS, 'rect');            rect.setAttribute('x', '100');
+            const rect = document.createElementNS(svgNS, 'rect');
+            rect.setAttribute('x', '100');
             rect.setAttribute('y', '80');
             rect.setAttribute('width', b/2);
             rect.setAttribute('height', h/2);
@@ -654,7 +684,6 @@
                 {x: 100 + dx*0.3, y: 80 + dy*0.7},
                 {x: 100 + dx*0.7, y: 80 + dy*0.7}
             ];
-
             rebars.forEach(r => {
                 const circle = document.createElementNS(svgNS, 'circle');
                 circle.setAttribute('cx', r.x);
@@ -684,7 +713,8 @@
         // Generate PDF
         async function generatePDF() {
             const { jsPDF } = window.jspdf;
-            const loading = document.getElementById('loading');            const toast = document.getElementById('toast');
+            const loading = document.getElementById('loading');
+            const toast = document.getElementById('toast');
 
             loading.style.display = 'block';
 
@@ -703,8 +733,7 @@
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
-                    format: 'a4'
-                });
+                    format: 'a4'                });
 
                 const imgWidth = 210;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
@@ -727,12 +756,13 @@
             }
         }
 
-        // Export DXF - VALID & TESTED
+        // Export DXF - VALID & TESTED + SVG Preview
         function exportDXF() {
             const b = parseFloat(document.getElementById('b').value) || 300;
             const h = parseFloat(document.getElementById('h').value) || 500;
             const mainRebar = document.getElementById('mainRebar').value || '4D16';
             const stirrup = document.getElementById('stirrup').value || 'Ø8@150';
+
             // DXF AC1027 - VALID STRUCTURE
             const dxf = `999
 DXF generated by Prodak Digital Mouza Engineer
@@ -752,8 +782,7 @@ SECTION
 TABLES
 0
 TABLE
-2
-LTYPE
+2LTYPE
 70
 1
 0
@@ -782,7 +811,8 @@ LAYER
 LAYER
 2
 0
-700
+70
+0
 62
 7
 6
@@ -801,8 +831,7 @@ ENDSEC
 SECTION
 2
 ENTITIES
-0
-LINE
+0LINE
 8
 0
 10
@@ -831,7 +860,8 @@ LINE
 0
 10
 ${b}
-20${h}
+20
+${h}
 11
 0.0
 21
@@ -850,8 +880,7 @@ ${h}
 0.0
 0
 CIRCLE
-8
-0
+80
 10
 ${b*0.2}
 20
@@ -880,7 +909,8 @@ ${h*0.8}
 6.0
 0
 CIRCLE
-80
+8
+0
 10
 ${b*0.8}
 20
@@ -899,12 +929,56 @@ TEXT
 2.5
 1
 Kolom: ${b}x${h} mm | Tulangan: ${mainRebar}
-0
-ENDSEC
+0ENDSEC
 0
 EOF`;
 
             try {
+                // Update SVG preview
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.getElementById('dxfSvg');
+                svg.innerHTML = ''; // Clear old
+
+                // Draw rectangle (kolom)
+                const rect = document.createElementNS(svgNS, 'rect');
+                rect.setAttribute('x', '20');
+                rect.setAttribute('y', '20');
+                rect.setAttribute('width', b/2);
+                rect.setAttribute('height', h/2);
+                rect.setAttribute('fill', 'none');
+                rect.setAttribute('stroke', '#1e3a8a');
+                rect.setAttribute('stroke-width', '2');
+                svg.appendChild(rect);
+
+                // Draw circles (rebar)
+                const circles = [
+                    {x: 20 + b/10, y: 20 + h/10},
+                    {x: 20 + (b/2 - b/10), y: 20 + h/10},
+                    {x: 20 + b/10, y: 20 + (h/2 - h/10)},
+                    {x: 20 + (b/2 - b/10), y: 20 + (h/2 - h/10)}
+                ];
+                circles.forEach(c => {
+                    const circle = document.createElementNS(svgNS, 'circle');
+                    circle.setAttribute('cx', c.x);
+                    circle.setAttribute('cy', c.y);
+                    circle.setAttribute('r', '6');
+                    circle.setAttribute('fill', '#25d366');
+                    svg.appendChild(circle);
+                });
+
+                // Add text label
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('x', '50%');
+                text.setAttribute('y', '90%');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#6b7280');
+                text.setAttribute('font-size', '12');
+                text.textContent = `Kolom: ${b}x${h} mm`;
+                svg.appendChild(text);
+
+                // Update textarea
+                document.getElementById('dxfCode').value = dxf;
+                // Trigger download
                 const blob = new Blob([dxf], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -914,11 +988,23 @@ EOF`;
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showToast('DXF berhasil diunduh! ✅ Bisa dibuka di AutoCAD/LibreCAD', 'success');
+                showToast('DXF berhasil diunduh! ✅ Pratinjau SVG siap dilihat', 'success');
             } catch (e) {
                 console.error('DXF export error:', e);
                 showToast('Gagal ekspor DXF. Coba lagi.', 'error');
             }
+        }
+
+        // Tab switching for DXF preview
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.preview-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
         }
 
         // Reset form
@@ -929,7 +1015,8 @@ EOF`;
             document.getElementById('floors').value = '2';
             document.getElementById('mainRebar').value = '4D16';
             document.getElementById('stirrup').value = 'Ø8@150';
-            document.getElementById('concrete').value = 'K250';            document.getElementById('steel').value = 'BJTP350';
+            document.getElementById('concrete').value = 'K250';
+            document.getElementById('steel').value = 'BJTP350';
             document.getElementById('resultsCard').style.display = 'none';
             showToast('Form direset! 🔄', 'success');
         }
@@ -940,8 +1027,7 @@ EOF`;
             const toastMessage = document.getElementById('toastMessage');
             toast.className = `toast ${type}`;
             toastMessage.textContent = message;
-            toast.style.display = 'flex';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            toast.style.display = 'flex';            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
         // On load
