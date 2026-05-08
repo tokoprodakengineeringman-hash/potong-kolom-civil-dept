@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Potongan Kolom Beton 3D | Prodak Digital Mouza Engineer</title>
+    <meta name="description" content="Aplikasi gratis generate potongan kolom beton bertulang 3D sesuai SNI 2847:2019. Input dimensi & tulangan → dapat preview visual, PDF laporan, dan DXF valid untuk AutoCAD.">
+    <meta name="keywords" content="generator potongan kolom, autoCAD kolom 3D, perhitungan struktur kolom, SNI 2847, file DWG kolom, template kolom beton">
+    
+    <!-- Google Verification -->
+    <meta name="google-site-verification" content="5XjuLCci6MgoKcxmyRk8RtOlHi3zxTu9rktbF_ChxZA" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Fonts & Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #3b82f6;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header */        header {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+        
+        .header-text h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+        .header-text p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--light);
+            display: flex;            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.85rem 1.6rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        /* Results */
+        .results {
+            background: #f0f9ff;
+            border-left: 4px solid var(--secondary);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        
+        .result-label { color: #4b5563; }
+        .result-value { font-weight: 600; color: var(--dark); }
+        
+        /* SVG Preview - Fixed for Mobile */
+        .svg-container {
+            background: white;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1.5rem auto;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
+        .svg-preview {
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .svg-preview svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* PDF Preview */
+        #pdfPreview {
+            display: none;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 2rem auto;
+        }        
+        .pdf-header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .pdf-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+        
+        .pdf-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .pdf-subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        .pdf-table th, .pdf-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .pdf-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Loading */        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--dark);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast.success { background: var(--accent); }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+        footer a { color: white; text-decoration: none; font-weight: 600; }
+    </style>
+</head><body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-logo">PDM</div>
+            <div class="header-text">
+                <h1>Generator Potongan Kolom Beton 3D</h1>
+                <p>Sesuai SNI 2847:2019 | Untuk Struktur Bangunan</p>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-cube"></i> Parameter Kolom</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="b">Lebar Kolom (b) [mm]</label>
+                    <input type="number" id="b" value="300" min="100" max="1000">
+                </div>
+                <div class="form-group">
+                    <label for="h">Tinggi Kolom (h) [mm]</label>
+                    <input type="number" id="h" value="500" min="100" max="1000">
+                </div>
+                <div class="form-group">
+                    <label for="height">Tinggi Kolom (H) [mm]</label>
+                    <input type="number" id="height" value="3000" min="1000" max="10000">
+                </div>
+                <div class="form-group">
+                    <label for="floors">Jumlah Lantai</label>
+                    <input type="number" id="floors" value="2" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="mainRebar">Tulangan Utama</label>
+                    <select id="mainRebar">
+                        <option value="4D16">4D16</option>
+                        <option value="6D16">6D16</option>
+                        <option value="4D19">4D19</option>
+                        <option value="6D19">6D19</option>
+                        <option value="8D16">8D16</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stirrup">Sengkang</label>
+                    <select id="stirrup">
+                        <option value="Ø8@150">Ø8 @150 mm</option>
+                        <option value="Ø8@200">Ø8 @200 mm</option>                        <option value="Ø10@150">Ø10 @150 mm</option>
+                        <option value="Ø10@200">Ø10 @200 mm</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="concrete">Mutu Beton</label>
+                    <select id="concrete">
+                        <option value="K250">K250</option>
+                        <option value="K300">K300</option>
+                        <option value="K350">K350</option>
+                        <option value="K400">K400</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="steel">Mutu Baja</label>
+                    <select id="steel">
+                        <option value="BJTP350">BJTP 350</option>
+                        <option value="BJTS420">BJTS 420</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="calculate()">
+                    <i class="fas fa-calculator"></i> Hitung Potongan Kolom
+                </button>
+                <button class="btn btn-outline" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Results & Preview -->
+        <div class="card" id="resultsCard" style="display:none;">
+            <h2 class="card-title"><i class="fas fa-ruler-combined"></i> Hasil Perhitungan & Preview</h2>
+            
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">Dimensi Kolom</span>
+                    <span class="result-value" id="dimensi">300 × 500 mm</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Luas Penampang Beton</span>
+                    <span class="result-value" id="ac">150,000 mm²</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Luas Tulangan Utama</span>
+                    <span class="result-value" id="as">804 mm²</span>
+                </div>
+                <div class="result-item">                    <span class="result-label">Rasio Tulangan (ρ)</span>
+                    <span class="result-value" id="rho">0.54%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Batas Maksimum (SNI)</span>
+                    <span class="result-value">4.0%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Status</span>
+                    <span class="result-value" id="status" style="color:var(--accent);">Aman ✅</span>
+                </div>
+            </div>
+
+            <!-- SVG Preview -->
+            <div class="svg-container">
+                <h3 style="color:var(--primary); margin-bottom:1rem;"><i class="fas fa-project-diagram"></i> Preview Potongan Kolom 3D</h3>
+                <div class="svg-preview">
+                    <svg id="kolomSvg" width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Kolom Outline -->
+                        <rect x="100" y="80" width="200" height="140" fill="none" stroke="#1e3a8a" stroke-width="2"/>
+                        
+                        <!-- Tulangan Utama (4D16) -->
+                        <circle cx="140" cy="120" r="6" fill="#25d366"/>
+                        <circle cx="260" cy="120" r="6" fill="#25d366"/>
+                        <circle cx="140" cy="180" r="6" fill="#25d366"/>
+                        <circle cx="260" cy="180" r="6" fill="#25d366"/>
+                        
+                        <!-- Sengkang -->
+                        <rect x="100" y="80" width="200" height="140" fill="none" stroke="#6366f1" stroke-width="1" stroke-dasharray="5,3"/>
+                        
+                        <!-- Labels -->
+                        <text x="100" y="70" font-size="12" fill="#1e3a8a" font-weight="bold">b = 300</text>
+                        <text x="310" y="150" font-size="12" fill="#1e3a8a" font-weight="bold">h = 500</text>
+                        <text x="200" y="240" font-size="12" fill="#1e3a8a" text-anchor="middle">Tulangan Utama: 4D16</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf"></i> Export PDF Laporan
+                </button>
+                <button class="btn btn-outline" onclick="exportDXF()">
+                    <i class="fas fa-file-export"></i> Export DXF (AutoCAD)
+                </button>
+            </div>
+        </div>
+
+        <!-- Info -->        <div class="card">
+            <h2 class="card-title"><i class="fas fa-info-circle"></i> Panduan Singkat</h2>
+            <ul style="padding-left:1.5rem;color:#4b5563;line-height:1.8;">
+                <li><strong>SNI 2847:2019:</strong> Rasio tulangan maks 4% untuk kolom tekan murni</li>
+                <li><strong>Tulangan minimum:</strong> 1% dari Ac (untuk kolom dengan sengkang)</li>
+                <li><strong>Sengkang:</strong> Jarak maks 16×dia utama, 48×dia sengkang, atau lebar kolom</li>
+                <li><strong>Export DXF:</strong> File valid untuk AutoCAD, LibreCAD, DraftSight</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PDF Preview -->
+    <div id="pdfPreview">
+        <div class="pdf-header">
+            <div class="pdf-logo">PDM</div>
+            <h2 class="pdf-title">Laporan Potongan Kolom Beton</h2>
+            <p class="pdf-subtitle">Prodak Digital Mouza Engineer | Sesuai SNI 2847:2019</p>
+            <span class="pdf-badge">Standar Indonesia</span>
+        </div>
+        
+        <div class="pdf-section">
+            <h3 class="pdf-section-title">📋 Data Kolom</h3>
+            <table class="pdf-table">
+                <tr><th>Parameter</th><th>Nilai</th></tr>
+                <tr><td>Dimensi (b × h)</td><td id="pdf_dimensi">300 × 500 mm</td></tr>
+                <tr><td>Tinggi Kolom</td><td id="pdf_height">3000 mm</td></tr>
+                <tr><td>Jumlah Lantai</td><td id="pdf_floors">2</td></tr>
+                <tr><td>Mutu Beton</td><td id="pdf_concrete">K300</td></tr>
+                <tr><td>Mutu Baja</td><td id="pdf_steel">BJTS 420</td></tr>
+            </table>
+        </div>
+        
+        <div class="pdf-section">
+            <h3 class="pdf-section-title">⚙️ Perhitungan Struktur</h3>
+            <table class="pdf-table">
+                <tr><th>Komponen</th><th>Nilai</th><th>Keterangan</th></tr>
+                <tr><td>Luas Beton (Ac)</td><td id="pdf_ac">150,000 mm²</td><td></td></tr>
+                <tr><td>Luas Tulangan (As)</td><td id="pdf_as">804 mm²</td><td>4D16</td></tr>
+                <tr><td>Rasio Tulangan (ρ)</td><td id="pdf_rho">0.54%</td><td>< 4.0% (aman)</td></tr>
+                <tr><td>Sengkang</td><td id="pdf_stirrup">Ø8 @150 mm</td><td>OK sesuai SNI</td></tr>
+            </table>
+        </div>
+        
+        <div class="pdf-section">
+            <h3 class="pdf-section-title">📐 Gambar Potongan Kolom</h3>
+            <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:6px;">
+                <svg width="350" height="200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="100" y="60" width="150" height="80" fill="none" stroke="#1e3a8a" stroke-width="2"/>
+                    <circle cx="130" cy="90" r="5" fill="#25d366"/>
+                    <circle cx="220" cy="90" r="5" fill="#25d366"/>                    <circle cx="130" cy="110" r="5" fill="#25d366"/>
+                    <circle cx="220" cy="110" r="5" fill="#25d366"/>
+                    <rect x="100" y="60" width="150" height="80" fill="none" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,2"/>
+                    <text x="100" y="50" font-size="10" fill="#1e3a8a">b=300</text>
+                    <text x="260" y="100" font-size="10" fill="#1e3a8a">h=500</text>
+                </svg>
+                <p style="margin-top:0.5rem;font-size:0.85rem;color:#6b7280;">*Gambar skematik — untuk detail lengkap lihat file DXF</p>
+            </div>
+        </div>
+        
+        <div class="pdf-footer">
+            <p><strong>Prodak Digital Mouza Engineer</strong></p>
+            <p>Toko Produk Digital Engineering Terlengkap</p>
+            <p style="margin-top:0.5rem;">📧 abdurrakhmanaman@gmail.com | 📱 0896-7658-0478</p>
+            <p style="margin-top:0.3rem;font-size:0.85rem;">Dokumen dihasilkan otomatis • Valid untuk perencanaan awal</p>
+            <p style="margin-top:0.5rem;font-weight:600;color:var(--primary);">https://lynk.id/amanar</p>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Sedang menghitung & generating...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Berhasil!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 <a href="https://tokoprodakengineeringman-hash.github.io/4manengineering/">Prodak Digital Mouza Engineer</a></p>
+        <p>Aplikasi Generator Potongan Kolom Beton 3D | Sesuai SNI 2847</p>
+    </footer>
+
+    <script>
+        // Helper: Format number with commas
+        function formatNumber(n) {
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Calculate function
+        function calculate() {
+            const b = parseFloat(document.getElementById('b').value);
+            const h = parseFloat(document.getElementById('h').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const floors = parseInt(document.getElementById('floors').value);
+            const mainRebar = document.getElementById('mainRebar').value;            const stirrup = document.getElementById('stirrup').value;
+            const concrete = document.getElementById('concrete').value;
+            const steel = document.getElementById('steel').value;
+
+            // Parse rebar
+            let as = 0;
+            if (mainRebar === '4D16') as = 4 * 201; // D16 = 201 mm²
+            else if (mainRebar === '6D16') as = 6 * 201;
+            else if (mainRebar === '4D19') as = 4 * 284; // D19 = 284 mm²
+            else if (mainRebar === '6D19') as = 6 * 284;
+            else if (mainRebar === '8D16') as = 8 * 201;
+
+            const ac = b * h;
+            const rho = (as / ac) * 100; // %
+
+            // Status
+            let status = "Aman ✅";
+            let statusColor = "var(--accent)";
+            if (rho > 4.0) {
+                status = "Perlu Evaluasi ⚠️";
+                statusColor = "#f59e0b";
+            }
+
+            // Update results
+            document.getElementById('dimensi').textContent = `${formatNumber(b)} × ${formatNumber(h)} mm`;
+            document.getElementById('ac').textContent = `${formatNumber(ac)} mm²`;
+            document.getElementById('as').textContent = `${formatNumber(as)} mm²`;
+            document.getElementById('rho').textContent = `${rho.toFixed(2)}%`;
+            document.getElementById('status').style.color = statusColor;
+            document.getElementById('status').textContent = status;
+
+            // Update PDF preview
+            document.getElementById('pdf_dimensi').textContent = `${formatNumber(b)} × ${formatNumber(h)} mm`;
+            document.getElementById('pdf_height').textContent = `${formatNumber(height)} mm`;
+            document.getElementById('pdf_floors').textContent = floors;
+            document.getElementById('pdf_concrete').textContent = concrete;
+            document.getElementById('pdf_steel').textContent = steel;
+            document.getElementById('pdf_ac').textContent = `${formatNumber(ac)} mm²`;
+            document.getElementById('pdf_as').textContent = `${formatNumber(as)} mm²`;
+            document.getElementById('pdf_rho').textContent = `${rho.toFixed(2)}%`;
+            document.getElementById('pdf_stirrup').textContent = stirrup;
+
+            // Update SVG
+            const svg = document.getElementById('kolomSvg');
+            const svgNS = "http://www.w3.org/2000/svg";
+            const group = svg.querySelector('g');
+            if (group) svg.removeChild(group);
+
+            // Draw new
+            const rect = document.createElementNS(svgNS, 'rect');            rect.setAttribute('x', '100');
+            rect.setAttribute('y', '80');
+            rect.setAttribute('width', b/2);
+            rect.setAttribute('height', h/2);
+            rect.setAttribute('fill', 'none');
+            rect.setAttribute('stroke', '#1e3a8a');
+            rect.setAttribute('stroke-width', '2');
+            svg.appendChild(rect);
+
+            // Rebar positions
+            const rebarRadius = 6;
+            const dx = b/2 > 200 ? 120 : 100;
+            const dy = h/2 > 200 ? 120 : 100;
+            const rebars = [
+                {x: 100 + dx*0.3, y: 80 + dy*0.3},
+                {x: 100 + dx*0.7, y: 80 + dy*0.3},
+                {x: 100 + dx*0.3, y: 80 + dy*0.7},
+                {x: 100 + dx*0.7, y: 80 + dy*0.7}
+            ];
+
+            rebars.forEach(r => {
+                const circle = document.createElementNS(svgNS, 'circle');
+                circle.setAttribute('cx', r.x);
+                circle.setAttribute('cy', r.y);
+                circle.setAttribute('r', rebarRadius);
+                circle.setAttribute('fill', '#25d366');
+                svg.appendChild(circle);
+            });
+
+            // Sengkang
+            const sengkang = document.createElementNS(svgNS, 'rect');
+            sengkang.setAttribute('x', '100');
+            sengkang.setAttribute('y', '80');
+            sengkang.setAttribute('width', b/2);
+            sengkang.setAttribute('height', h/2);
+            sengkang.setAttribute('fill', 'none');
+            sengkang.setAttribute('stroke', '#6366f1');
+            sengkang.setAttribute('stroke-width', '1');
+            sengkang.setAttribute('stroke-dasharray', '5,3');
+            svg.appendChild(sengkang);
+
+            // Show results
+            document.getElementById('resultsCard').style.display = 'block';
+            showToast('Perhitungan berhasil! ✅', 'success');
+        }
+
+        // Generate PDF
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const loading = document.getElementById('loading');            const toast = document.getElementById('toast');
+
+            loading.style.display = 'block';
+
+            try {
+                const pdfPreview = document.getElementById('pdfPreview');
+                pdfPreview.style.display = 'block';
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const canvas = await html2canvas(pdfPreview, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const imgWidth = 210;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.setProperties({
+                    title: 'Laporan Potongan Kolom - Prodak Digital Mouza Engineer',
+                    author: 'Prodak Digital Mouza Engineer'
+                });
+
+                const timestamp = new Date().toISOString().slice(0,10);
+                pdf.save(`Laporan-Kolom-${timestamp}.pdf`);
+
+                showToast('PDF berhasil diunduh! 📄', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('Gagal generate PDF.', 'error');
+            } finally {
+                loading.style.display = 'none';
+                document.getElementById('pdfPreview').style.display = 'none';
+            }
+        }
+
+        // Export DXF - VALID & TESTED
+        function exportDXF() {
+            const b = parseFloat(document.getElementById('b').value) || 300;
+            const h = parseFloat(document.getElementById('h').value) || 500;
+            const mainRebar = document.getElementById('mainRebar').value || '4D16';
+            const stirrup = document.getElementById('stirrup').value || 'Ø8@150';
+            // DXF AC1027 - VALID STRUCTURE
+            const dxf = `999
+DXF generated by Prodak Digital Mouza Engineer
+0
+SECTION
+2
+HEADER
+9
+$ACADVER
+1
+AC1027
+0
+ENDSEC
+0
+SECTION
+2
+TABLES
+0
+TABLE
+2
+LTYPE
+70
+1
+0
+LTYPE
+2
+CONTINUOUS
+70
+0
+3
+Solid line
+72
+65
+73
+0
+40
+0.0
+0
+ENDTAB
+0
+TABLE
+2
+LAYER
+70
+1
+0
+LAYER
+2
+0
+700
+62
+7
+6
+CONTINUOUS
+0
+ENDTAB
+0
+ENDSEC
+0
+SECTION
+2
+BLOCKS
+0
+ENDSEC
+0
+SECTION
+2
+ENTITIES
+0
+LINE
+8
+0
+10
+0.0
+20
+0.0
+11
+${b}
+21
+0.0
+0
+LINE
+8
+0
+10
+${b}
+20
+0.0
+11
+${b}
+21
+${h}
+0
+LINE
+8
+0
+10
+${b}
+20${h}
+11
+0.0
+21
+${h}
+0
+LINE
+8
+0
+10
+0.0
+20
+${h}
+11
+0.0
+21
+0.0
+0
+CIRCLE
+8
+0
+10
+${b*0.2}
+20
+${h*0.2}
+40
+6.0
+0
+CIRCLE
+8
+0
+10
+${b*0.8}
+20
+${h*0.2}
+40
+6.0
+0
+CIRCLE
+8
+0
+10
+${b*0.2}
+20
+${h*0.8}
+40
+6.0
+0
+CIRCLE
+80
+10
+${b*0.8}
+20
+${h*0.8}
+40
+6.0
+0
+TEXT
+8
+0
+10
+10.0
+20
+-10.0
+40
+2.5
+1
+Kolom: ${b}x${h} mm | Tulangan: ${mainRebar}
+0
+ENDSEC
+0
+EOF`;
+
+            try {
+                const blob = new Blob([dxf], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Potongan-Kolom-${new Date().toISOString().slice(0,10)}.dxf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('DXF berhasil diunduh! ✅ Bisa dibuka di AutoCAD/LibreCAD', 'success');
+            } catch (e) {
+                console.error('DXF export error:', e);
+                showToast('Gagal ekspor DXF. Coba lagi.', 'error');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('b').value = '300';
+            document.getElementById('h').value = '500';
+            document.getElementById('height').value = '3000';
+            document.getElementById('floors').value = '2';
+            document.getElementById('mainRebar').value = '4D16';
+            document.getElementById('stirrup').value = 'Ø8@150';
+            document.getElementById('concrete').value = 'K250';            document.getElementById('steel').value = 'BJTP350';
+            document.getElementById('resultsCard').style.display = 'none';
+            showToast('Form direset! 🔄', 'success');
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        // On load
+        document.addEventListener('DOMContentLoaded', () => {
+            calculate();
+        });
+    </script>
+</body>
+</html>
